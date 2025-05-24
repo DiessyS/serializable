@@ -21,14 +21,22 @@ abstract class Serializable {
   /// 3. Compress the list of bytes (if compression is enabled)
   /// 4. Return the compressed list of bytes
   Future<List<int>> serialize() async {
-    return await compute(_serializeInIsolate, toJson());
+    return await compute(_serialize, toJson());
+  }
+
+  List<int> syncSerialize() {
+    return _serialize(toJson());
   }
 
   Future<Uint8List> serializeToUint8List() async {
     return Uint8List.fromList(await serialize());
   }
 
-  List<int> _serializeInIsolate(Map data) {
+  Uint8List syncSerializeToUint8List() {
+    return Uint8List.fromList(syncSerialize());
+  }
+
+  List<int> _serialize(Map data) {
     final String encodedJson = json.encode(data);
     final Uint8List bytes = utf8.encode(encodedJson);
     return _serializableCompressionEnabled ? gzip.encode(bytes) : bytes;
@@ -40,14 +48,22 @@ abstract class Serializable {
   /// 2. Convert the decompressed bytes to a map
   /// 3. Convert the map to data for itself
   Future<void> deserialize(List<int> bytes) async {
-    fromJson(await compute(_deserializeInIsolate, bytes));
+    fromJson(await compute(_deserialize, bytes));
+  }
+
+  void syncDeserialize(List<int> bytes) {
+    fromJson(_deserialize(bytes));
   }
 
   Future<void> deserializeFromUint8List(Uint8List bytes) async {
     await deserialize(bytes.toList());
   }
 
-  Map<String, dynamic> _deserializeInIsolate(List<int> bytes) {
+  void syncDeserializeFromUint8List(Uint8List bytes) {
+    syncDeserialize(bytes.toList());
+  }
+
+  Map<String, dynamic> _deserialize(List<int> bytes) {
     final List<int> serialized =
         _serializableCompressionEnabled ? gzip.decode(bytes) : bytes;
     final String encodedJson = utf8.decode(serialized);

@@ -40,6 +40,23 @@ void main() {
     expect(object2.age, 30);
   });
 
+  test('sync serialize', () {
+    final object = ObjectMock(name: 'John', age: 30);
+    final bytes = object.syncSerialize();
+    expect(bytes, isA<List<int>>());
+  });
+
+  test('sync deserialize', () {
+    final object = ObjectMock(name: 'John', age: 30);
+    final bytes = object.syncSerialize();
+
+    final object2 = ObjectMock(name: '', age: 0);
+    object2.syncDeserialize(bytes);
+
+    expect(object2.name, 'John');
+    expect(object2.age, 30);
+  });
+
   test('compression on small data, data size grows', () async {
     final object = ObjectMock(name: 'John', age: 30);
     final bytes = await object.serialize();
