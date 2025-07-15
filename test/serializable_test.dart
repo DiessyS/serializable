@@ -6,79 +6,62 @@ import 'mock/object_mock.dart';
 import 'mock/object_mock_compressed.dart';
 
 void main() {
-  test('serialize', () async {
+  test('serialize', () {
     final object = ObjectMock(name: 'John', age: 30);
-    final bytes = await object.serialize();
+    final bytes = object.serialize();
     expect(bytes, isA<List<int>>());
   });
 
-  test('deserialize', () async {
+  test('deserialize', () {
     final object = ObjectMock(name: 'John', age: 30);
-    final bytes = await object.serialize();
+    final bytes = object.serialize();
 
     final object2 = ObjectMock(name: '', age: 0);
-    await object2.deserialize(bytes);
+    object2.deserialize(bytes);
 
     expect(object2.name, 'John');
     expect(object2.age, 30);
   });
 
-  test('serializeToUint8List', () async {
+  test('serializeToUint8List', () {
     final object = ObjectMock(name: 'John', age: 30);
-    final bytes = await object.serializeToUint8List();
+    final bytes = object.serializeToUint8List();
     expect(bytes, isA<Uint8List>());
   });
 
-  test('deserializeFromUint8List', () async {
+  test('deserializeFromUint8List', () {
     final object = ObjectMock(name: 'John', age: 30);
-    final bytes = await object.serializeToUint8List();
+    final bytes = object.serializeToUint8List();
 
     final object2 = ObjectMock(name: '', age: 0);
-    await object2.deserializeFromUint8List(bytes);
+    object2.deserializeFromUint8List(bytes);
 
     expect(object2.name, 'John');
     expect(object2.age, 30);
   });
 
-  test('sync serialize', () {
+  test('compression on small data, data size grows', () {
     final object = ObjectMock(name: 'John', age: 30);
-    final bytes = object.syncSerialize();
-    expect(bytes, isA<List<int>>());
-  });
-
-  test('sync deserialize', () {
-    final object = ObjectMock(name: 'John', age: 30);
-    final bytes = object.syncSerialize();
-
-    final object2 = ObjectMock(name: '', age: 0);
-    object2.syncDeserialize(bytes);
-
-    expect(object2.name, 'John');
-    expect(object2.age, 30);
-  });
-
-  test('compression on small data, data size grows', () async {
-    final object = ObjectMock(name: 'John', age: 30);
-    final bytes = await object.serialize();
+    final bytes = object.serialize();
 
     final objectCompressed = ObjectMockCompressed(name: 'John', age: 30);
-    final bytesCompressed = await objectCompressed.serialize();
+    final bytesCompressed = objectCompressed.serialize();
 
     expect(bytesCompressed.length, greaterThan(bytes.length));
   });
 
-  test('compression on big data, data size shrinks', () async {
+  test('compression on big data, data size shrinks', () {
     final objectBig = ObjectMock(
       name: 'John' * 1000,
       age: 30,
     );
-    final bytesBig = await objectBig.serialize();
+    final bytesBig = objectBig.serialize();
 
     final objectBigCompressed = ObjectMockCompressed(
       name: 'John' * 1000,
       age: 30,
     );
-    final bytesBigCompressed = await objectBigCompressed.serialize();
+    final bytesBigCompressed = objectBigCompressed.serialize();
 
     expect(bytesBigCompressed.length, lessThan(bytesBig.length));
   });
